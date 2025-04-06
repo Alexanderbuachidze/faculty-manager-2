@@ -17,8 +17,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
     "sass": "^1.86.0",
-    "swr": "^2.3.3",
-    "vite-phoenix": "file:C:/Users/user/Desktop/falcon-react-vite-v1.0.1/"
+    "swr": "^2.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

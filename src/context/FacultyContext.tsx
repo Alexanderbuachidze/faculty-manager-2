@@ -1,7 +1,5 @@
-"use client"
-
 import { Faculty } from "../lib/faculty"
-import { createContext, useReducer, ReactNode, useContext } from "react"
+import { createContext, useReducer, ReactNode, useContext, useEffect } from "react"
 import useSWR from "swr"
 
 type State = {
@@ -15,6 +13,8 @@ export type Action =
   | { type: "UPDATE_FACULTY"; payload: Faculty }
   | { type: "DELETE_FACULTY"; payload: number }
   | { type: "SET_SELECTED_FACULTY"; payload: Faculty | null }
+  | { type: "SET_INITIAL_FACULTIES"; payload: Faculty[] }
+
 
 const facultyReducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -31,6 +31,8 @@ const facultyReducer = (state: State, action: Action): State => {
       return { ...state, faculties: state.faculties.filter((f) => f.id !== action.payload) }
     case "SET_SELECTED_FACULTY":
       return { ...state, selectedFaculty: action.payload }
+    case "SET_INITIAL_FACULTIES":
+      return { ...state, faculties: action.payload };
     default:
       return state
   }
@@ -38,7 +40,7 @@ const facultyReducer = (state: State, action: Action): State => {
 
 const FacultyContext = createContext<{ state: State; dispatch: React.Dispatch<Action>; } | undefined>(undefined)
 
-export function FacultyProvider({ children, initialFaculties }: { children: ReactNode; initialFaculties: Faculty[] }) {
+export function FacultyProvider({ children }: { children: ReactNode; }) {
 
   const fetcher = async (url: string) => {
     const response = await fetch(url)
@@ -46,12 +48,16 @@ export function FacultyProvider({ children, initialFaculties }: { children: Reac
     return response.json()
   }
 
-  const { data: faculties } = useSWR("https://jsonplaceholder.typicode.com/posts", fetcher, {
-    fallbackData: initialFaculties,
-  })
+  const { data: faculties } = useSWR("https://jsonplaceholder.typicode.com/posts", fetcher)
   const [state, dispatch] = useReducer(facultyReducer, {
-    faculties: faculties || [], selectedFaculty: null,
+    faculties: [], selectedFaculty: null,
   })
+
+  useEffect(() => {
+    if (faculties) {
+      dispatch({ type: "SET_INITIAL_FACULTIES", payload: faculties });
+    }
+  }, [faculties]);
   return <FacultyContext.Provider value={{ state, dispatch }}>{children}</FacultyContext.Provider>
 }
 

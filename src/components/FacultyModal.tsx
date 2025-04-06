@@ -16,6 +16,13 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
     title: faculty?.title ?? "",
     body: faculty?.body ?? "",
   });
+// const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
+//   const [facultyItem, setFacultyItem] = useState<Faculty>({
+//     id: faculty?.id || 1,
+//     title: faculty?.title || "",
+//     body: faculty?.body || "",
+//   });
+
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
