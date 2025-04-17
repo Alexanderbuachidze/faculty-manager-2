@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useFaculty } from "../context/FacultyContext";
 import { addFaculty, updateFaculty } from "../lib/actions";
@@ -16,17 +17,20 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
     title: faculty?.title ?? "",
     body: faculty?.body ?? "",
   });
-// const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
-//   const [facultyItem, setFacultyItem] = useState<Faculty>({
-//     id: faculty?.id || 1,
-//     title: faculty?.title || "",
-//     body: faculty?.body || "",
-//   });
-
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
   const { dispatch } = useFaculty();
+
+  const isUpdating = !!faculty;
+  const isUnchanged =
+    isUpdating &&
+    facultyItem.title === faculty.title &&
+    facultyItem.body === faculty.body;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,7 +38,6 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
     setMessage(null);
 
     try {
-      const isUpdating = !!faculty;
       let result;
 
       if (isUpdating) {
@@ -47,7 +50,11 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
         throw new Error(result.message);
       }
 
-      setMessage({ type: "success", text: isUpdating ? "Updated successfully!" : "Added successfully!" });
+      setMessage({
+        type: "success",
+        text: isUpdating ? "Updated successfully!" : "Added successfully!",
+      });
+
       closeModal();
     } catch (error) {
       setMessage({ type: "error", text: (error as Error).message });
@@ -59,7 +66,7 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
   return (
     <Modal show={openModal} onHide={closeModal} centered dialogClassName="modal-fixed-right">
       <Modal.Header className="modal-header-settings" closeButton>
-        <Modal.Title>{faculty ? "Edit Faculty" : "Add Faculty"}</Modal.Title>
+        <Modal.Title>{isUpdating ? "Edit Faculty" : "Add Faculty"}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -76,7 +83,9 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
               className="form-control"
               placeholder="Faculty Title"
               value={facultyItem.title}
-              onChange={(e) => setFacultyItem({ ...facultyItem, title: e.target.value })}
+              onChange={(e) =>
+                setFacultyItem({ ...facultyItem, title: e.target.value })
+              }
               required
             />
           </div>
@@ -86,13 +95,23 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
               className="form-control"
               placeholder="Faculty Description"
               value={facultyItem.body}
-              onChange={(e) => setFacultyItem({ ...facultyItem, body: e.target.value })}
+              onChange={(e) =>
+                setFacultyItem({ ...facultyItem, body: e.target.value })
+              }
               required
             />
           </div>
 
-          <Button variant="primary" type="submit" disabled={loading}>
-            {loading ? "Processing..." : faculty ? "Update Faculty" : "Add Faculty"}
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={loading || (isUpdating && isUnchanged)}
+          >
+            {loading
+              ? "Processing..."
+              : isUpdating
+              ? "Update Faculty"
+              : "Add Faculty"}
           </Button>
         </form>
       </Modal.Body>
@@ -101,3 +120,4 @@ const FacultyModal = ({ faculty, closeModal, openModal }: Props) => {
 };
 
 export default FacultyModal;
+
